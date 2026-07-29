@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GA4 Property Architecture — AGCO Parts &amp; Service</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#024051; --navy-deep:#052A35; --navy-2:#1E5C72;
+  --amber:#F59E0B; --amber-deep:#b45309; --green:#15803D;
+  --slate:#64748B; --muted:#94A3B8; --line:#E2E8F0; --line-strong:#CBD5E1;
+  --bg:#eef2f4; --surface:#ffffff; --ink:#0f2b33;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --sans:"Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --g-na:#1E5C72; --g-emea:#15803D; --g-anz:#b45309; --g-br:#64748B;
+}
+*{box-sizing:border-box}
+body{margin:0; font-family:var(--sans); background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; line-height:1.5}
+.wrap{max-width:1160px; margin:0 auto; padding:0 24px}
+.hidden{display:none !important}
+
+/* ---------- passcode gate ---------- */
+.gate{position:fixed; inset:0; z-index:100; display:grid; place-items:center; padding:20px;
+  background:radial-gradient(900px 360px at 80% -30%, rgba(245,158,11,.16), transparent 60%), linear-gradient(160deg,var(--navy),var(--navy-deep))}
+.gate__card{width:min(400px,92vw); text-align:center; color:#fff}
+.gate__mark{font-weight:800; font-size:26px; letter-spacing:.02em}
+.gate__mark span{color:var(--amber)}
+.gate__eyebrow{margin-top:20px; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--amber); font-weight:700}
+.gate__card h1{font-size:22px; font-weight:700; margin:8px 0 4px}
+.gate__card p{color:#a9c1c9; font-size:13px; margin:0 0 22px}
+.gate__row{display:flex; gap:8px}
+.gate input{flex:1; padding:12px 14px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.08); color:#fff;
+  border-radius:10px; font:inherit; font-size:15px; text-align:center; letter-spacing:.04em}
+.gate input::placeholder{color:#7f9aa3}
+.gate input:focus{outline:2px solid var(--amber); border-color:transparent; background:rgba(255,255,255,.12)}
+.gate button{padding:12px 20px; border:none; border-radius:10px; background:var(--amber); color:#3a2600; font:inherit; font-weight:700; font-size:15px; cursor:pointer}
+.gate button:hover{filter:brightness(1.06)}
+.gate__err{min-height:18px; margin-top:12px; font-size:12.5px; color:#fca5a5}
+.gate__foot{margin-top:26px; font-size:11px; color:#6f8b95}
+
+/* ---------- top bar ---------- */
+.top{display:flex; align-items:center; gap:14px; padding:16px 24px; max-width:1160px; margin:0 auto}
+.wordmark{font-weight:800; letter-spacing:.02em; color:var(--navy); font-size:19px}
+.wordmark span{color:var(--amber)}
+.top__sub{font-size:12px; color:var(--slate); border-left:1px solid var(--line-strong); padding-left:14px}
+.badge{margin-left:auto; background:var(--amber); color:#fff; font-size:11px; font-weight:700; letter-spacing:.12em; padding:5px 11px; border-radius:6px}
+
+/* ---------- hero ---------- */
+.hero{background:
+    radial-gradient(1100px 380px at 82% -40%, rgba(245,158,11,.18), transparent 60%),
+    linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%);
+  color:#fff; border-radius:20px; padding:40px 44px; position:relative; overflow:hidden; margin-top:6px}
+.hero::before{content:""; position:absolute; inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:34px 34px; mask-image:linear-gradient(180deg,#000,transparent 75%)}
+.hero__eyebrow{position:relative; font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:var(--amber); font-weight:700}
+.hero h1{position:relative; font-size:38px; font-weight:800; margin:10px 0 8px; letter-spacing:-.02em; line-height:1.08}
+.hero p{position:relative; color:#b8cdd4; margin:0; max-width:60ch; font-size:15px}
+.stats{position:relative; display:flex; flex-wrap:wrap; gap:14px; margin-top:26px}
+.stat{background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:12px 18px; min-width:118px}
+.stat b{display:block; font-size:26px; font-weight:800; letter-spacing:-.01em}
+.stat span{font-size:11.5px; color:#9fb8c0; text-transform:uppercase; letter-spacing:.08em}
+
+/* ---------- section ---------- */
+.section{margin:42px 0}
+.section__label{display:flex; align-items:baseline; gap:12px; margin-bottom:18px}
+.section__label h2{font-size:20px; font-weight:700; color:var(--navy); margin:0; letter-spacing:-.01em}
+.section__label span{font-size:13px; color:var(--slate)}
+.rule{height:2px; background:var(--amber); width:44px; border-radius:2px; margin-bottom:2px}
+
+/* ---------- rollup architecture ---------- */
+.arch{display:flex; flex-direction:column; align-items:center; gap:0}
+.roll{border-radius:14px; width:100%; color:#fff; box-shadow:0 6px 22px rgba(2,64,81,.10)}
+.roll--global{background:linear-gradient(135deg,var(--navy),#036078); padding:20px 24px}
+.roll__top{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px}
+.roll__name{font-size:15px; font-weight:700; letter-spacing:.02em; display:flex; align-items:center; gap:10px}
+.roll__tag{font-family:var(--mono); font-size:12px; background:rgba(255,255,255,.16); padding:3px 9px; border-radius:6px; cursor:pointer}
+.roll__tag:hover{background:rgba(255,255,255,.28)}
+.roll__count{font-size:12.5px; color:rgba(255,255,255,.85)}
+.roll__chips{display:flex; flex-wrap:wrap; gap:7px; margin-top:14px}
+.chip{display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.18);
+  padding:5px 10px; border-radius:8px; font-size:12.5px; font-weight:600; white-space:nowrap}
+.chip .fl{font-size:14px; line-height:1}
+.connector{width:2px; height:26px; background:var(--line-strong)}
+.branch{display:grid; grid-template-columns:1.5fr 1fr; gap:16px; width:100%; align-items:start}
+.branch-col{display:flex; flex-direction:column; gap:14px}
+.sub{border-radius:14px; padding:18px 20px; color:#fff}
+.sub--na{background:linear-gradient(135deg,var(--g-na),#2b7591)}
+.sub--emea{background:linear-gradient(135deg,var(--g-emea),#1c9e4f)}
+.sub--anz{background:linear-gradient(135deg,var(--g-anz),#d97706)}
+.sub--br{background:linear-gradient(135deg,var(--g-br),#7c8a99)}
+.sub__name{font-size:13.5px; font-weight:700; letter-spacing:.03em; text-transform:uppercase}
+.sub__meta{font-size:11.5px; opacity:.9; margin:3px 0 12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.sub__meta .roll__tag{background:rgba(255,255,255,.2)}
+.pending{font-family:var(--mono); font-size:11px; background:rgba(255,255,255,.16); padding:3px 8px; border-radius:6px}
+.hint{font-size:12px; color:var(--slate); text-align:center; margin-top:16px; max-width:80ch; margin-left:auto; margin-right:auto}
+.hint b{color:var(--ink)}
+
+/* ---------- inventory table ---------- */
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:0 1px 2px rgba(11,42,54,.05),0 8px 26px rgba(11,42,54,.05); overflow:hidden}
+.panel__bar{display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid var(--line); flex-wrap:wrap}
+.search{position:relative; flex:1; min-width:220px; max-width:360px}
+.search input{width:100%; padding:9px 12px 9px 32px; border:1px solid var(--line-strong); border-radius:9px; font:inherit; font-size:13.5px}
+.search input:focus{outline:2px solid var(--amber); border-color:transparent}
+.search::before{content:"⌕"; position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--muted)}
+.legend{display:flex; gap:14px; font-size:12px; color:var(--slate); flex-wrap:wrap; margin-left:auto}
+.legend i{width:9px; height:9px; border-radius:3px; display:inline-block; margin-right:5px; vertical-align:middle}
+table{width:100%; border-collapse:collapse; font-size:13px}
+thead th{position:sticky; top:0; background:var(--navy); color:#e7eff2; text-align:left; padding:11px 16px; font-size:11.5px; letter-spacing:.04em; font-weight:600; white-space:nowrap}
+tbody td{padding:10px 16px; border-top:1px solid var(--line); vertical-align:middle}
+tbody tr:hover{background:#f7fafb}
+.mkt{display:flex; align-items:center; gap:9px; font-weight:700; color:var(--navy)}
+.mkt .fl{font-size:17px}
+.mkt small{display:block; font-weight:500; color:var(--slate); font-size:11px; letter-spacing:.02em}
+.copyable{font-family:var(--mono); font-size:12px; cursor:pointer; border-bottom:1px dashed var(--line-strong); color:var(--ink)}
+.copyable:hover{color:var(--navy); border-color:var(--amber)}
+.copyable.copied{color:var(--green); border-color:var(--green)}
+.rollpill{display:inline-block; font-size:10px; font-weight:700; padding:2px 7px; border-radius:5px; margin-right:4px; letter-spacing:.03em; color:#fff}
+.rp-global{background:var(--navy)} .rp-na{background:var(--g-na)} .rp-emea{background:var(--g-emea)}
+.prop-name{font-family:var(--mono); font-size:11.5px; color:var(--slate)}
+
+.foot{margin:36px 0 50px; padding-top:18px; border-top:1px solid var(--line); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:12px; color:var(--muted)}
+.toast{position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(16px); background:var(--navy); color:#fff; padding:10px 18px; border-radius:9px; font-size:13px; opacity:0; pointer-events:none; transition:.2s; z-index:50}
+.toast.show{opacity:1; transform:translateX(-50%)}
+
+@media (prefers-reduced-motion: no-preference){
+  .roll,.sub,.panel,.hero{animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
+  .branch-col .sub:nth-child(2){animation-delay:.06s}.branch-col .sub:nth-child(3){animation-delay:.12s}.panel{animation-delay:.12s}
+  @keyframes rise{from{opacity:0; transform:translateY(12px)}to{opacity:1; transform:none}}
+}
+@media (max-width:820px){
+  .hero{padding:30px 24px} .hero h1{font-size:29px}
+  .branch{grid-template-columns:1fr}
+  .legend{width:100%; margin-left:0}
+  .resp{overflow-x:auto}
+}
+:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+</style>
+</head>
+<body>
+
+<!-- passcode gate -->
+<div class="gate" id="gate">
+  <div class="gate__card">
+    <div class="gate__mark">AGCO<span>.</span></div>
+    <div class="gate__eyebrow">Internal · Passcode required</div>
+    <h1>GA4 Property Architecture</h1>
+    <p>Enter the team passcode to view.</p>
+    <div class="gate__row">
+      <input id="pw" type="password" placeholder="Passcode" autocomplete="off" aria-label="Passcode">
+      <button id="pwBtn">Enter</button>
+    </div>
+    <div class="gate__err" id="pwErr" role="alert"></div>
+    <div class="gate__foot">AGCO Parts &amp; Service · Digital Analytics</div>
+  </div>
+</div>
+
+<!-- app (revealed after passcode) -->
+<div id="app" class="hidden">
+  <div class="top">
+    <div class="wordmark">AGCO<span>.</span></div>
+    <div class="top__sub">Parts &amp; Service · Digital Analytics</div>
+    <div class="badge">INTERNAL</div>
+  </div>
+
+  <div class="wrap">
+    <header class="hero">
+      <div class="hero__eyebrow">Measurement Architecture</div>
+      <h1>GA4 Property Architecture</h1>
+      <p>The complete map of AGCO Parts &amp; Service GA4 properties and how each one rolls up. Click any ID to copy it.</p>
+      <div class="stats" id="stats"></div>
+    </header>
+
+    <section class="section">
+      <div class="section__label"><div><div class="rule"></div><h2>Roll-up mapping</h2></div><span>how each market property feeds the roll-ups</span></div>
+      <div class="arch" id="arch"></div>
+      <p class="hint" id="hint"></p>
+    </section>
+
+    <section class="section">
+      <div class="section__label"><div><div class="rule"></div><h2>Property inventory</h2></div><span>17 market properties · 3 roll-ups</span></div>
+      <div class="panel">
+        <div class="panel__bar">
+          <label class="search"><input id="q" type="search" placeholder="Search market, property, or ID…" aria-label="Search properties"></label>
+          <div class="legend">
+            <span><i style="background:var(--navy)"></i>Global</span>
+            <span><i style="background:var(--g-na)"></i>NA</span>
+            <span><i style="background:var(--g-emea)"></i>EMEA</span>
+          </div>
+        </div>
+        <div class="resp">
+          <table>
+            <thead><tr><th>Market</th><th>Property name (GA4)</th><th>Property ID</th><th>Measurement ID</th><th>Stream ID</th><th>Roll-ups</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <span>AGCO Parts &amp; Service · GA4 Property Architecture</span>
+      <span id="gen"></span>
+    </footer>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---- passcode (stored as SHA-256, not plaintext) --------------------- */
+const PASS_HASH = "65a8cc61dfd4343d678a0350bb84f913c104ea9c14d041e900397b728623d126";
+function sha256(ascii){
+  function rr(v,a){return (v>>>a)|(v<<(32-a));}
+  var mp=Math.pow,mw=mp(2,32),res="";
+  var words=[],abl=ascii.length*8;
+  var hash=sha256.h=sha256.h||[],k=sha256.k=sha256.k||[],pc=k.length,ic={};
+  for(var cand=2;pc<64;cand++){if(!ic[cand]){for(var i=0;i<313;i+=cand){ic[i]=cand;}hash[pc]=(mp(cand,.5)*mw)|0;k[pc++]=(mp(cand,1/3)*mw)|0;}}
+  ascii+="\x80";while(ascii.length%64-56)ascii+="\x00";
+  for(i=0;i<ascii.length;i++){var j=ascii.charCodeAt(i);if(j>>8)return;words[i>>2]|=j<<((3-i)%4)*8;}
+  words[words.length]=(abl/mw)|0;words[words.length]=abl;
+  for(j=0;j<words.length;){var w=words.slice(j,j+=16),oh=hash;hash=hash.slice(0,8);
+    for(i=0;i<64;i++){var w15=w[i-15],w2=w[i-2],a=hash[0],e=hash[4];
+      var t1=hash[7]+(rr(e,6)^rr(e,11)^rr(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]+(w[i]=i<16?w[i]:(w[i-16]+(rr(w15,7)^rr(w15,18)^(w15>>>3))+w[i-7]+(rr(w2,17)^rr(w2,19)^(w2>>>10)))|0);
+      var t2=(rr(a,2)^rr(a,13)^rr(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+      hash=[(t1+t2)|0].concat(hash);hash[4]=(hash[4]+t1)|0;}
+    for(i=0;i<8;i++){hash[i]=(hash[i]+oh[i])|0;}}
+  for(i=0;i<8;i++){for(j=3;j+1;j--){var b=(hash[i]>>(j*8))&255;res+=((b<16)?0:"")+b.toString(16);}}
+  return res;
+}
+const $ = s => document.querySelector(s);
+function unlock(){
+  const v = $("#pw").value.trim();
+  if(sha256(v) === PASS_HASH){ $("#gate").classList.add("hidden"); $("#app").classList.remove("hidden"); render(); }
+  else { $("#pwErr").textContent = "Incorrect passcode — try again."; $("#pw").select(); }
+}
+$("#pwBtn").onclick = unlock;
+$("#pw").addEventListener("keydown", e=>{ if(e.key==="Enter") unlock(); });
+$("#pw").focus();
+
+/* ---- data (from Property.xlsx) -------------------------------------- */
+const ROLLUPS = {
+  Global: { id:"376570387", name:"AGCO Shop Roll up — Global" },
+  EMEA:   { id:"376524226", name:"AGCO Shop Roll up — EMEA" },
+  NA:     { id:"376548565", name:"AGCO Parts Roll up — NA" }
+};
+const P = [
+  { code:"US", fl:"🇺🇸", country:"United States", region:"NA",   name:"XX - AGCO Corp Parts US - GA4", pid:"368522199", mid:"G-PPKCJYP1BV", sid:"5035342037", rolls:["Global","NA"] },
+  { code:"CA", fl:"🇨🇦", country:"Canada",        region:"NA",   name:"XX - AGCO Corp Parts CA - GA4", pid:"368661199", mid:"G-6W98XL0JMM", sid:"5035341587", rolls:["Global","NA"] },
+  { code:"IE", fl:"🇮🇪", country:"Ireland",       region:"EMEA", name:"XX - AGCO Shop IE - GA4",       pid:"368662269", mid:"G-ZMWLY5HDXG", sid:"5035271214", rolls:["Global","EMEA"] },
+  { code:"DK", fl:"🇩🇰", country:"Denmark",       region:"EMEA", name:"XX - AGCO Corp DK - GA4",       pid:"371845731", mid:"G-BE2XGHMGY1", sid:"5114963673", rolls:["Global","EMEA"] },
+  { code:"ES", fl:"🇪🇸", country:"Spain",         region:"EMEA", name:"XX - AGCO Shop ES - GA4",       pid:"368528697", mid:"G-7KY1DJ37FN", sid:"5035310029", rolls:["Global","EMEA"] },
+  { code:"BR", fl:"🇧🇷", country:"Brazil",        region:"LATAM",name:"XX - AGCO Corp Br - GA4",       pid:"362887662", mid:"G-KLN69CVGD4", sid:"4850249720", rolls:["Global"] },
+  { code:"DE", fl:"🇩🇪", country:"Germany",       region:"EMEA", name:"XX - AGCO Shop DE - GA4",       pid:"368582957", mid:"G-SE44MM2WZP", sid:"5035322661", rolls:["Global","EMEA"] },
+  { code:"FR", fl:"🇫🇷", country:"France",        region:"EMEA", name:"XX - AGCO Shop FR - GA4",       pid:"368662764", mid:"G-18JW1LWTV4", sid:"5035330045", rolls:["Global","EMEA"] },
+  { code:"NO", fl:"🇳🇴", country:"Norway",        region:"EMEA", name:"XX - AGCO Corp NO - GA4",       pid:"362698311", mid:"G-DRBZDGEWZ2", sid:"4852458643", rolls:["Global","EMEA"] },
+  { code:"UK", fl:"🇬🇧", country:"United Kingdom",region:"EMEA", name:"XX - AGCO Shop UK - GA4",       pid:"368671512", mid:"G-ZEBN39V5YW", sid:"5035328012", rolls:["Global","EMEA"] },
+  { code:"PL", fl:"🇵🇱", country:"Poland",        region:"EMEA", name:"XX - AGCO Corp PL - GA4",       pid:"378082344", mid:"G-76CM6S8T86", sid:"5256839752", rolls:["Global","EMEA"] },
+  { code:"FI", fl:"🇫🇮", country:"Finland",       region:"EMEA", name:"XX - AGCO Corp FI - GA4",       pid:"368670930", mid:"G-0KDMVK70MS", sid:"5035333792", rolls:["Global","EMEA"] },
+  { code:"IT", fl:"🇮🇹", country:"Italy",         region:"EMEA", name:"XX - AGCO Corp IT - GA4",       pid:"378102707", mid:"G-4RC7LJTH44", sid:"5256973259", rolls:["Global","EMEA"] },
+  { code:"SE", fl:"🇸🇪", country:"Sweden",        region:"EMEA", name:"Prod - SE - Agco Shop",         pid:"451192116", mid:"G-9EK2V3TWZC", sid:"8498893186", rolls:["Global","EMEA"] },
+  { code:"TR", fl:"🇹🇷", country:"Turkey",        region:"EMEA", name:"Prod - TR - Agco Shop",         pid:"451173717", mid:"G-D6NJ10GTM2", sid:"8498861219", rolls:["Global","EMEA"] },
+  { code:"NZ", fl:"🇳🇿", country:"New Zealand",   region:"ANZ",  name:"PROD-NZ-AGCO-SHOP",             pid:"462433767", mid:"G-SRN0LNJZWW", sid:"9792312688", rolls:["Global"] },
+  { code:"AU", fl:"🇦🇺", country:"Australia",     region:"ANZ",  name:"Prod - AU - AGCO SHOP",         pid:"462436701", mid:"G-TH1GZLDPGK", sid:"9792264994", rolls:["Global"] }
+];
+
+const chip = p => `<span class="chip"><span class="fl">${p.fl}</span>${p.code}</span>`;
+const tag  = id => `<span class="roll__tag copyable" data-copy="${id}" title="Copy property ID">#${id}</span>`;
+const byRegion = r => P.filter(p=>p.region===r);
+
+function render(){
+  const emea=byRegion("EMEA"), na=byRegion("NA"), anz=byRegion("ANZ"), br=byRegion("LATAM");
+
+  /* stats */
+  $("#stats").innerHTML = [
+    [P.length,"Properties"],[3,"Roll-ups"],[emea.length,"EMEA markets"],[na.length,"NA markets"],[anz.length,"ANZ markets"]
+  ].map(s=>`<div class="stat"><b>${s[0]}</b><span>${s[1]}</span></div>`).join("");
+
+  /* architecture */
+  $("#arch").innerHTML = `
+    <div class="roll roll--global">
+      <div class="roll__top">
+        <div class="roll__name">🌐 GLOBAL ROLL-UP ${tag(ROLLUPS.Global.id)}</div>
+        <div class="roll__count">${P.length} properties · all markets</div>
+      </div>
+      <div class="roll__chips">${P.map(chip).join("")}</div>
+    </div>
+    <div class="connector"></div>
+    <div class="branch">
+      <div class="sub sub--emea">
+        <div class="sub__name">EMEA Roll-up</div>
+        <div class="sub__meta">${tag(ROLLUPS.EMEA.id)} · ${emea.length} markets</div>
+        <div class="roll__chips">${emea.map(chip).join("")}</div>
+      </div>
+      <div class="branch-col">
+        <div class="sub sub--na">
+          <div class="sub__name">NA Roll-up</div>
+          <div class="sub__meta">${tag(ROLLUPS.NA.id)} · ${na.length} markets</div>
+          <div class="roll__chips">${na.map(chip).join("")}</div>
+        </div>
+        <div class="sub sub--anz">
+          <div class="sub__name">ANZ</div>
+          <div class="sub__meta"><span class="pending">no roll-up yet</span> · ${anz.length} markets</div>
+          <div class="roll__chips">${anz.map(chip).join("")}</div>
+        </div>
+        <div class="sub sub--br">
+          <div class="sub__name">Brazil</div>
+          <div class="sub__meta"><span class="pending">Global only</span> · ${br.length} market</div>
+          <div class="roll__chips">${br.map(chip).join("")}</div>
+        </div>
+      </div>
+    </div>`;
+
+  $("#hint").innerHTML = `Every market property feeds the <b>Global</b> roll-up. <b>NA</b> and <b>EMEA</b> have their own regional roll-ups. <b>ANZ</b> (Australia &amp; New Zealand) and <b>Brazil</b> report into Global only — a dedicated ANZ roll-up isn't created yet.`;
+
+  $("#gen").textContent = "Generated "+new Date().toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+  renderRows();
+  $("#q").addEventListener("input", e=>renderRows(e.target.value));
+}
+
+const rollpill = r => `<span class="rollpill rp-${r.toLowerCase()}">${r}</span>`;
+function renderRows(q=""){
+  q=q.trim().toLowerCase();
+  const rows = P.filter(p=>!q || (p.code+p.country+p.region+p.name+p.pid+p.mid+p.sid).toLowerCase().includes(q));
+  $("#rows").innerHTML = rows.map(p=>`<tr>
+    <td><span class="mkt"><span class="fl">${p.fl}</span><span>${p.code}<small>${p.country} · ${p.region}</small></span></span></td>
+    <td class="prop-name">${p.name.replace(/\n/g,"").trim()}</td>
+    <td><span class="copyable" data-copy="${p.pid}">${p.pid}</span></td>
+    <td><span class="copyable" data-copy="${p.mid}">${p.mid}</span></td>
+    <td><span class="copyable" data-copy="${p.sid}">${p.sid}</span></td>
+    <td>${p.rolls.map(rollpill).join("")}</td>
+  </tr>`).join("") || `<tr><td colspan="6" style="padding:22px;text-align:center;color:var(--slate)">No properties match “${q}”.</td></tr>`;
+  wireCopy();
+}
+function wireCopy(){
+  document.querySelectorAll(".copyable").forEach(el=>{
+    el.onclick=()=>{ const v=el.dataset.copy; navigator.clipboard?.writeText(v); el.classList.add("copied"); toast("Copied "+v); setTimeout(()=>el.classList.remove("copied"),900); };
+  });
+}
+function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),1300); }
+</script>
+</body>
+</html>
