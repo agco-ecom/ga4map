@@ -319,7 +319,7 @@ function render(){
 
   $("#hint").innerHTML = `Every market property feeds the <b>Global</b> roll-up. <b>NA</b> and <b>EMEA</b> have their own regional roll-ups. <b>ANZ</b> (Australia &amp; New Zealand) and <b>Brazil</b> report into Global only — a dedicated ANZ roll-up isn't created yet.`;
 
-  $("#gen").textContent = "Generated "+new Date().toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+  $("#gen").textContent = "Built By Sarthak Madaan";
   renderRows();
   $("#q").addEventListener("input", e=>renderRows(e.target.value));
 }
